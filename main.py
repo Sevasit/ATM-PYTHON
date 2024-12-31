@@ -85,14 +85,18 @@ class ATM:
         firstname = input("Enter your firstname: ").strip()
         surname = input("Enter your surname: ").strip()
         phone = input("Enter your phone number: ").strip()
+        if not phone.isdigit() or len(phone) != 10:
+            print("Invalid phone number. Please try again.")
+            self.timeout_clear()
+            return
         email = input("Enter your email: ").strip()
         if not self.is_valid_email(email):
             print("Invalid email. Please try again.")
             self.timeout_clear()
             return
         password = input("Enter your password: ").strip()
-        if not self.is_valid_email(email):
-            print("Invalid email. Please try again.")
+        if not self.is_valid_password(password) or len(password) < 8:
+            print("Invalid password. Please try again.")
             self.timeout_clear()
             return
         account = Account(
@@ -106,6 +110,84 @@ class ATM:
         time.sleep(3)
         os.system("cls" if os.name == "nt" else "clear")
 
+    def deposit(self):
+        if not self.current_account:
+            print("No account is logged in.")
+            return
+
+        try:
+            amount = float(input("Enter the amount you want to deposit: ").strip())
+            if amount <= 0:
+                print("Deposit amount must be greater than 0.")
+                return
+            result = self.current_account.deposit(amount)
+            print(result)
+            self.timeout_clear()
+        except ValueError:
+            print("Invalid input. Please enter a numeric value.")
+
+    def withdraw(self):
+        if not self.current_account:
+            print("No account is logged in.")
+            return
+
+        try:
+            amount = float(input("Enter the amount you want to withdraw: ").strip())
+            result = self.current_account.withdraw(amount)
+            print(result)
+        except ValueError:
+            print("Invalid input. Please enter a numeric value.")
+        self.timeout_clear()
+
+    def transfer(self):
+        if not self.current_account:
+            print("No account is logged in.")
+            return
+
+        recipient_account = input("Enter the recipient account number: ").strip()
+        if recipient_account not in self.accounts:
+            print("Recipient account does not exist.")
+            return
+
+        try:
+            amount = float(input("Enter the amount you want to transfer: ").strip())
+            result = self.current_account.transfer(
+                amount, self.accounts[recipient_account]
+            )
+            print(result)
+        except ValueError:
+            print("Invalid input. Please enter a numeric value.")
+        self.timeout_clear()
+
+    def deactivate_account(self):
+        if not self.current_account:
+            print("No account is logged in.")
+            return
+        del self.accounts[self.current_account.username]
+        self.current_account = None
+        print("Account deactivated successfully!")
+        self.timeout_clear()
+
+    def account_details(self):
+        if not self.current_account:
+            print("No account is logged in.")
+            return
+        self.current_account.check_account()
+        self.timeout_clear()
+
+    def check_balance(self):
+        if not self.current_account:
+            print("No account is logged in.")
+            return
+        print(self.current_account.check_balance())
+        self.timeout_clear()
+
+    def logout(self):
+        self.current_account = None
+        print("Logout successful!")
+        self.timeout_clear()
+        self.run()
+
     def menu(self):
         while True:
             print("1. Deposit")
@@ -113,39 +195,51 @@ class ATM:
             print("3. Transfer")
             print("4. Deactivate an account")
             print("5. Account")
-            print("6. Logout")
-            choice = input("Enter your choice: ")
+            print("6. Check balance")
+            print("7. Logout")
+            choice = input("Enter your choice: ").strip()
             if choice == "1":
+                print("\033c")
                 self.deposit()
             elif choice == "2":
+                print("\033c")
                 self.withdraw()
             elif choice == "3":
+                print("\033c")
                 self.transfer()
             elif choice == "4":
+                print("\033c")
                 self.deactivate_account()
             elif choice == "5":
+                print("\033c")
                 self.account_details()
             elif choice == "6":
+                print("\033c")
+                self.check_balance()
+            elif choice == "7":
+                print("\033c")
                 self.logout()
             else:
                 print("Invalid choice. Please try again.")
 
     def login(self):
-        username = input("Enter your username: ")
-        password = input("Enter your password: ")
+        username = input("Enter your username: ").strip()
+        password = input("Enter your password: ").strip()
         for account in self.accounts.values():
             if account.username == username and account.password == password:
-                self.current_account = account
+                self.current_account = self.accounts[account.username]
                 print("Login successful!")
+                self.timeout_clear()
                 return
         print("Invalid username or password. Please try again.")
+        self.timeout_clear()
 
     def run(self):
         while True:
             print("1. Login")
             print("2. Register")
             print("3. Exit")
-            choice = input("Enter your choice: ")
+            choice = input("Enter your choice: ").strip()
             if choice == "1":
                 print("\033c")
                 self.login()
