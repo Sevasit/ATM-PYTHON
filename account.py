@@ -16,7 +16,7 @@ class Account:
             return f"Deposit successful! New balance: {self.balance:.2f}"
         return "Deposit amount must be greater than 0."
 
-    def with_draw(self, amount):
+    def withdraw(self, amount):
         if amount > 0 and amount <= self.balance:
             self.balance -= amount
             return f"Withdraw successful! New balance: {self.balance:.2f}"
@@ -31,13 +31,15 @@ class Account:
         print(f"Phone: {self.phone}")
         print(f"Email: {self.email}")
         print(f"Username: {self.username}")
-        print(f"Account number: {self.account_number}")
+        print(f"Account number: {self.username}")
         print(f"Balance: {self.balance:.2f}")
         print("-----------------------")
 
-    def transfer(self, account, amount):
-        if amount > 0 and amount <= self.balance:
+    def transfer(self, amount, recipient_account):
+        if 0 < amount <= self.balance:
             self.balance -= amount
-            account.balance += amount
+            recipient_account.deposit(amount)  # Deposit into the recipient account
             return f"Transfer successful! New balance: {self.balance:.2f}"
-        return "Transfer amount must be greater than 0 and less than or equal to your balance."
+        elif amount > self.balance:
+            return "Insufficient funds."
+        return "Transfer amount must be greater than 0."
